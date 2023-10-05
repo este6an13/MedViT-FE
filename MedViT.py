@@ -457,11 +457,6 @@ class MedViT(nn.Module):
 
         self.norm = nn.BatchNorm2d(output_channel, eps=NORM_EPS)
 
-        self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
-        self.proj_head = nn.Sequential(
-            nn.Linear(output_channel, num_classes),
-        )
-
         self.stage_out_idx = [sum(depths[:idx + 1]) - 1 for idx in range(len(depths))]
         print('initialize_weights...')
         self._initialize_weights()
