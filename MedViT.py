@@ -422,7 +422,7 @@ class MedViT(nn.Module):
                                   [ECB] * (depths[3] - 1) + [LTB]]
 
         self.stem = nn.Sequential(
-            ConvBNReLU(3, stem_chs[0], kernel_size=3, stride=2),
+            ConvBNReLU(1, stem_chs[0], kernel_size=3, stride=2),
             ConvBNReLU(stem_chs[0], stem_chs[1], kernel_size=3, stride=1),
             ConvBNReLU(stem_chs[1], stem_chs[2], kernel_size=3, stride=1),
             ConvBNReLU(stem_chs[2], stem_chs[2], kernel_size=3, stride=2),
@@ -456,6 +456,11 @@ class MedViT(nn.Module):
         self.features = nn.Sequential(*features)
 
         self.norm = nn.BatchNorm2d(output_channel, eps=NORM_EPS)
+
+        self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
+        self.proj_head = nn.Sequential(
+            nn.Linear(output_channel, num_classes),
+        )
 
         self.stage_out_idx = [sum(depths[:idx + 1]) - 1 for idx in range(len(depths))]
         print('initialize_weights...')
@@ -493,7 +498,6 @@ class MedViT(nn.Module):
         x = torch.flatten(x, 1)
         x = self.proj_head(x)
         return x
-
 
 @register_model
 def MedViT_small(pretrained=False, pretrained_cfg=None, **kwargs):
